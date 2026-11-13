@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Budget Planner</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f7a56">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;700&display=swap">
+<style>
+:root{--bg:#f3f6f1;--surface:#ffffff;--text:#1d2a24;--muted:#5d6b63;--line:#dbe3dc;--accent:#1f7a56;--accent-text:#ffffff;--warn:#b4531a;--bad:#b3261e;--good:#1f7a56;--soft:#e6f0ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121915;--surface:#1b241f;--text:#e8efe9;--muted:#9fb0a5;--line:#2c3a32;--accent:#4fc08d;--accent-text:#0d1812;--warn:#e69a62;--bad:#f08a82;--good:#4fc08d;--soft:#22302a}}
+:root[data-theme="dark"]{--bg:#121915;--surface:#1b241f;--text:#e8efe9;--muted:#9fb0a5;--line:#2c3a32;--accent:#4fc08d;--accent-text:#0d1812;--warn:#e69a62;--bad:#f08a82;--good:#4fc08d;--soft:#22302a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.5}
+html[lang="dv"] body{font-family:"Noto Sans Thaana","MV Boli","Faruma","Segoe UI",system-ui,sans-serif;line-height:1.9}
+main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.lang{display:flex;gap:4px;flex-shrink:0}
+.lang button{padding:6px 12px}
+.lang button[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px;flex:1 1 140px}
+input,select,button{font:inherit;color:var(--text)}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px}
+button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700;align-self:flex-end}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat small{color:var(--muted);display:block}
+.stat b{font-size:1.35rem}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{border:none;background:none;border-radius:8px 8px 0 0;padding:10px 16px;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--text);font-weight:700;border-bottom-color:var(--accent)}
+.badge{background:var(--accent);color:var(--accent-text);border-radius:99px;padding:1px 8px;font-size:.75rem;margin-inline-start:6px}
+ul{list-style:none;margin:0;padding:0}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .name{flex:1}
+.cat{color:var(--muted);font-size:.8rem}
+.del{padding:4px 9px;color:var(--bad)}
+.bar{height:10px;background:var(--soft);border-radius:6px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.cbar{margin-bottom:12px}
+.cbar div.h{display:flex;justify-content:space-between;font-size:.92rem;gap:8px}
+.tip{border-inline-start:4px solid var(--accent);background:var(--soft);padding:10px 12px;border-radius:8px;margin-bottom:10px}
+.tip.warn{border-inline-start-color:var(--warn)}
+.tip.bad{border-inline-start-color:var(--bad)}
+.tip strong{display:block}
+.empty{color:var(--muted);padding:8px 0}
+.hl{font-size:1.05rem}
+[hidden]{display:none!important}
+.msg{padding:8px 12px;border-radius:10px;margin-bottom:8px;white-space:pre-wrap;max-width:92%}
+.msg.u{background:var(--soft);margin-inline-start:auto}
+.msg.a{border:1px solid var(--line)}
+.chip{font-size:.85rem;padding:5px 11px;border-radius:99px}
+#chatLog{max-height:420px;overflow-y:auto}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+<div><h1 data-i="title"></h1><p class="sub" data-i="sub"></p></div>
+<div class="lang" role="group" aria-label="Language"><button id="lEn" aria-pressed="true">English</button><button id="lDv" aria-pressed="false">ދިވެހި</button></div>
+</div>
+<div class="panel" id="authBar">
+<p id="authMsg" style="margin:0 0 8px"></p>
+<div class="row" id="authForm"><input id="em" type="email" data-ip="phEmail" style="flex:1 1 220px"><button class="primary" id="signIn" style="align-self:auto" data-i="authSend"></button></div>
+<button id="signOut" data-i="signOut" hidden></button>
+</div>
+
+<div class="panel">
+<div class="row">
+<label><span data-i="lblIncome"></span><input id="income" type="number" min="0" step="any" data-ip="phIncome"></label>
+<label><span data-i="lblCur"></span><input id="cur" type="text" maxlength="5" value="MVR"></label>
+</div>
+</div>
+
+<div class="panel">
+<div class="row">
+<label style="flex:2 1 180px"><span data-i="lblExp"></span><input id="name" type="text" data-ip="phName"></label>
+<label><span data-i="lblAmt"></span><input id="amt" type="number" min="0" step="any" placeholder="0"></label>
+<label><span data-i="lblCat"></span><select id="cat"></select></label>
+<button class="primary" id="addBtn" data-i="addExp"></button>
+</div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="tabs" role="tablist">
+<button class="tab" role="tab" id="t1" aria-selected="true" data-i="tab1"></button>
+<button class="tab" role="tab" id="t2" aria-selected="false"><span data-i="tab2"></span><span class="badge" id="tipCount">0</span></button>
+<button class="tab" role="tab" id="t3" aria-selected="false" data-i="tab3"></button>
+</div>
+
+<section id="p1"></section>
+<section id="p2" hidden></section>
+<section id="p3" hidden>
+<div class="panel"><div class="row">
+<label style="flex:2 1 160px"><span data-i="dName"></span><input id="dn" type="text" data-ip="phDname"></label>
+<label><span data-i="dType"></span><select id="dt"></select></label>
+<label><span data-i="dBal"></span><input id="db" type="number" min="0" step="any"></label>
+<label><span data-i="dRate"></span><input id="dr" type="number" min="0" step="any" value="15"></label>
+<label><span data-i="dPay"></span><input id="dm" type="number" min="0" step="any"></label>
+<label><span data-i="dStart"></span><input id="ds" type="date"></label>
+<label><span data-i="dEnd"></span><input id="de" type="date"></label>
+<button class="primary" id="dadd" data-i="addDebt"></button>
+</div>
+<div class="row" style="margin-top:10px"><label style="max-width:260px"><span data-i="dExtra"></span><input id="dx" type="number" min="0" step="any" data-ip="phExtra"></label></div>
+<p class="sub" style="margin:10px 0 0;font-size:.85rem" data-i="dNote"></p></div>
+<div id="dlist"></div>
+<div class="panel" id="aiPanel">
+<h2 style="margin:0 0 4px;font-size:1.1rem" data-i="aiTitle"></h2>
+<p class="sub" style="margin:0 0 10px;font-size:.85rem" data-i="aiSub"></p>
+<div id="chatLog"></div>
+<div class="row" style="margin:8px 0">
+<button class="chip" data-i="c1" data-qk="q1"></button>
+<button class="chip" data-i="c2" data-qk="q2"></button>
+<button class="chip" data-i="c3" data-qk="q3"></button>
+<button class="chip" data-i="c4" data-qk="q4"></button>
+</div>
+<div class="row"><input id="chatIn" type="text" data-ip="phChat" style="flex:1 1 240px"><button class="primary" id="chatBtn" style="align-self:auto" data-i="send"></button></div>
+</div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ===== EDIT THESE 3 VALUES (see README.md) ===== */
+const CONFIG={
+SUPABASE_URL:"https://YOUR-PROJECT.supabase.co",
+SUPABASE_ANON_KEY:"YOUR-SUPABASE-ANON-KEY",
+AI_URL:"https://budget-ai.YOUR-SUBDOMAIN.workers.dev"
+};
+/* =============================================== */
+const L={en:{},dv:{}};
+L.en={
+title:"Budget Planner",sub:"Add your income and expenses. Savings tips update by themselves.",
+lblIncome:"Monthly income",lblCur:"Currency",phIncome:"e.g. 15000",lblExp:"Expense",phName:"e.g. Groceries",lblAmt:"Amount",lblCat:"Category",addExp:"Add expense",
+stIncome:"Income",stTotal:"Total expenses",stDebtPay:"Loan and card payments",stLeft:"Left to save",
+tab1:"Expenses",tab2:"How to save more",tab3:"Loans & cards",
+byCat:"By category",allExp:"All expenses",noExpYet:"No expenses yet. Add your first one above.",nothingYet:"Nothing added yet.",del:"Delete",delAria:"Delete {n}",
+tipsEmpty:"Add some expenses and your personal saving tips will appear here automatically.",
+saveMY:"By following the category tips, you could save about {m} each month, or {y} a year.",
+c_Housing:"Housing",c_Food:"Food",c_Transport:"Transport",c_Bills:"Bills",c_Health:"Health",c_Shopping:"Shopping",c_Entertainment:"Entertainment",c_Subscriptions:"Subscriptions",c_Other:"Other",c_Debt:"Loans & cards",
+tip_Housing:"Look at cheaper rent, a roommate, or negotiating your rent. Lower electricity use with efficient bulbs and AC at a higher setting.",
+tip_Food:"Plan weekly meals, cook at home, buy staples in bulk and cut takeaway to once a week.",
+tip_Transport:"Share rides, walk or cycle short trips, and combine errands to use less fuel.",
+tip_Bills:"Compare phone and internet plans, switch off unused devices, and fix leaks or standby power.",
+tip_Health:"Use generics where your doctor agrees, and keep up preventive care to avoid larger costs.",
+tip_Shopping:"Wait 48 hours before non-essential purchases and set a monthly shopping limit.",
+tip_Entertainment:"Pick free or low-cost activities, and cap eating out and outings with a fixed fun budget.",
+tip_Subscriptions:"Cancel services you barely use, share family plans, and review them every quarter.",
+tip_Other:"Review these items one by one and ask which ones you could skip next month.",
+t_noIncome:"Add your monthly income",d_noIncome:"Enter your income at the top so tips can compare your spending with healthy targets.",
+t_over:"You are overspending by {x}",d_over:"Expenses are higher than income. Cut the biggest non-essential items below first, and pause new spending until you are back in balance.",
+t_rate:"Your savings rate is {r}%",d_rate:"A common goal is to save 20% of income ({g}). You need to find {x} more.",
+t_great:"Great work: you save {r}% of your income",d_great:"Move the money you save into a separate savings account so it is not spent by accident.",
+t_wants:"Wants take more than 30% of income",d_wants:"You spend {w} on wants (shopping, fun, subscriptions, other). Try to bring this near {g}.",
+t_cat:"{c}: {p}% of income (target about {b}%)",d_cat:"You could save up to {x} a month. {tip}",
+t_top:"Your biggest single expense is {n} ({a})",d_top:"Ask yourself whether it is a need, and whether a cheaper option exists.",
+t_largest:"{c} is your largest category",t_track:"Track every day",d_track:"Small purchases add up. Write them here the same day so nothing is missed.",
+dName:"Name",dType:"Type",dBal:"Balance owed",dRate:"Interest per year (%)",dPay:"Monthly payment",dStart:"Loan start date",dEnd:"Loan end date",dExtra:"Extra you could pay each month",addDebt:"Add debt",
+phDname:"e.g. Bank loan",phExtra:"e.g. 500",
+dNote:"Monthly payments are counted in your expenses and in the savings tips. Personal loans in the Maldives are often around 15% a year, so use the exact rate from your agreement.",
+"type_Personal loan":"Personal loan","type_Credit card":"Credit card",
+dEmpty:"No loans or cards added yet. Add one above to see how long it takes to pay off and how to pay less interest.",
+sOwed:"Total owed",sMonthly:"Monthly payments",sInt:"Interest per year (about)",sAll:"All debts paid off by",
+meta:"{type}, {r}% a year",range:"{a} to {b}",owedLine:"Owed {b}, paying {p} a month",
+grow:"Your payment does not cover the monthly interest ({i}), so the debt keeps growing. Pay more.",
+free:"Debt-free in about {m} ({d}), paying {i} in interest.",
+extraLine:"If you pay {e} extra a month: debt-free by {d} ({n} months sooner), you save {i} in interest, and after that you can save {p} a month.",
+pct:"{p}% of the loan time has passed",ended:"The end date has passed. Pay what is left as soon as you can.",
+onTrack:"On track: your payment is enough to finish by {d}.",afterThat:"After that you can save {p} a month ({y} a year).",
+needMore:"To finish by {d} you need to pay {n} a month, which is {x} more than now.",
+yr:"yr",mo:"mo",under1:"under 1 mo",
+hTitle:"How to handle your debt",t_dti:"Debt payments take {r}% of your income",
+d_dtiBad:"This is very high. Take no new loans or card spending, and cut other expenses to pay debt down faster.",
+d_dtiWarn:"This is above the usual healthy limit of about 30%. Avoid new borrowing until it comes down.",
+d_dtiOk:"This is within the usual healthy limit of about 30%. Keep it there.",
+t_addInc:"Add your income",d_addInc:"Enter your monthly income on the first tab to see how heavy your debt payments are.",
+t_aval:"Pay the highest rate first: {n} ({r}%)",d_aval:"Pay the required amount on every debt, then put all extra money on the debt with the highest rate. This costs the least interest. When it is paid, move that payment to the next one.",
+t_extra1:"Put extra money on {n}",d_extra1:"Even a small extra payment every month cuts the interest and the time. Try the extra amount box above to see the effect.",
+t_card:"Credit cards: pay the full balance when you can",d_card:"Paying only the minimum keeps you in debt for a long time. Do not use a card for things you cannot pay for this month, avoid cash advances (they usually have extra fees), and never miss a due date.",
+t_loan:"Personal loans: ask for a better deal",d_loan:"Compare offers from other banks. If you can get a clearly lower rate, refinancing can save money, but check fees and early settlement charges first. Never take a new loan only to pay an old one unless the total cost is lower.",
+t_sure:"Paying debt is a sure return",d_sure:"Paying off a {r}% debt gives you a guaranteed {r}% gain, which is usually more than a savings account pays. Build a small emergency fund first (even one month of expenses) so a surprise cost does not go back on a card.",
+t_stop:"Stop adding new debt",d_stop:"Pay cash for wants such as shopping and outings. Every new loan or card purchase adds to the monthly payment and lowers what you can save.",
+aiTitle:"Ask AI about your loans",aiSub:"The AI reads the income, expenses and loans you entered. It gives general guidance, not professional advice.",
+c1:"Which debt first?",q1:"Which debt should I pay first?",c2:"Be debt-free sooner",q2:"How can I be debt-free sooner?",c3:"Can I pay extra?",q3:"Can I afford to pay extra each month?",c4:"Take a new loan?",q4:"Should I take a new loan?",
+phChat:"Ask anything about your loans or saving",send:"Send",thinking:"Thinking...",
+aiNA:"AI chat is not available in this view. Open the published page link while signed in to Claude.",
+aiDenied:"Permission was not given, so the AI cannot answer. You can allow it from the page permissions menu.",
+aiRate:"Too many questions. Please wait a minute and try again.",aiFail:"The AI could not answer. Please try again."
+};
+L.dv={
+title:"ބަޖެޓް ޕްލޭނަރ",sub:"އާމްދަނީއާއި ޚަރަދުތައް އިތުރުކުރައްވާ. ސޭވްކުރާނެ ގޮތްތަކުގެ ނަސޭހަތް އަމިއްލައަށް އާވެގެންދާނެ.",
+lblIncome:"މަހުގެ އާމްދަނީ",lblCur:"ކަރަންސީ",phIncome:"މިސާލު: 15000",lblExp:"ޚަރަދު",phName:"މިސާލު: ގްރޯސަރީ",lblAmt:"އަދަދު",lblCat:"ބާވަތް",addExp:"ޚަރަދު އިތުރުކުރައްވާ",
+stIncome:"އާމްދަނީ",stTotal:"ޖުމްލަ ޚަރަދު",stDebtPay:"ލޯނާއި ކާޑުގެ ޕޭމަންޓް",stLeft:"ސޭވްކުރެވޭނެ އަދަދު",
+tab1:"ޚަރަދުތައް",tab2:"އިތުރަށް ސޭވްކުރާނެ ގޮތް",tab3:"ލޯނާއި ކާޑު",
+byCat:"ބާވަތްތަކުގެ ގޮތުން",allExp:"ހުރިހާ ޚަރަދުތައް",noExpYet:"އަދި ޚަރަދެއް ނެތް. މަތީގައި ފުރަތަމަ ޚަރަދު އިތުރުކުރައްވާ.",nothingYet:"އަދި އެއްޗެއް އިތުރުކުރެވިފައެއް ނުވޭ.",del:"ފޮހެލާ",delAria:"{n} ފޮހެލާ",
+tipsEmpty:"ޚަރަދުތައް އިތުރުކުރެއްވުމުން ތިބާއަށް ޚާއްސަ ނަސޭހަތްތައް މިތަނުގައި އަމިއްލައަށް ފެންނާނެ.",
+saveMY:"ބާވަތްތަކުގެ ނަސޭހަތް އަމަލުކުރެއްވުމުން މަހަކު ގާތްގަނޑަކަށް {m} އާއި އަހަރެއްގައި {y} ސޭވްކުރެވިދާނެ.",
+c_Housing:"ގެދޮރު",c_Food:"ކެއުން",c_Transport:"ދަތުރުފަތުރު",c_Bills:"ބިލްތައް",c_Health:"ސިއްހަތު",c_Shopping:"ޝޮޕިންގް",c_Entertainment:"މަޖާވެރިކަން",c_Subscriptions:"ސަބްސްކްރިޕްޝަން",c_Other:"އެހެނިހެން",c_Debt:"ލޯނާއި ކާޑު",
+tip_Housing:"ކުޑަ ކުއްޔެއް ހޯދައްވާ، ނުވަތަ އެކުވެރިއަކާ ބައްސަވާ، ނުވަތަ ކުއްޔާ ބެހޭ ގޮތުން ވާހަކަ ދައްކަވާ. ކަރަންޓް މަދުކުރުމަށް ފަހި ބަލްބް ބޭނުންކުރައްވާ، އަދި އެސީގެ ޓެމްޕަރޗަރ މަތިން ބަހައްޓަވާ.",
+tip_Food:"ހަފްތާއަކަށް ކެއުމުގެ ރޭވުމެއް ކުރައްވާ، ގެޔަށް ފިހާ ކައްވާ، ބޭނުންތެރި ސާމާނު ގިނައިން ގަނެލައްވާ، އަދި ބޭރުން ގަންނަ ކެއުން ހަފްތާއަކު އެއްފަހަރަށް ކުޑަކުރައްވާ.",
+tip_Transport:"ދަތުރުފަތުރު ބައިވެރިވެ ކުރައްވާ، ކައިރީގެ ދަތުރުތައް ހިނގާ ނުވަތަ ސައިކަލުން ކުރައްވާ، އަދި މަސައްކަތްތައް އެއްފަހަރާ ކުރައްވާ.",
+tip_Bills:"ފޯނާއި އިންޓަނެޓް ޕްލޭންތައް އަޅާބަލައްވާ، ބޭނުން ނުކުރާ ސާމާނު ނިއްވާލައްވާ، އަދި ފެނާއި ކަރަންޓް ފައްސަޖެހުން ދުރުކުރައްވާ.",
+tip_Health:"ޑޮކްޓަރ ހުއްދަ ދެއްވާނަމަ ޖެނެރިކް ބޭހެއް ބޭނުންކުރައްވާ، އަދި ބޮޑު ޚަރަދުތަކުން ސަލާމަތްވުމަށް ކުރިން ބެލެހެއްޓުން ކުރައްވާ.",
+tip_Shopping:"ބޭނުންތެރި ނޫން ގަތުމަކުން ކުރިން 48 ގަޑިއިރު މަޑުކުރައްވާ، އަދި މަހުގެ ޝޮޕިންގް ހައްދެއް ކަނޑައަޅުއްވާ.",
+tip_Entertainment:"ހިލޭ ނުވަތަ ކުޑަ ޚަރަދުގެ މަޖާތައް ހޮވާ، އަދި ބޭރުގެ ކެއުމާއި ދަތުރުތަކަށް ވަކި ބަޖެޓެއް ކަނޑައަޅުއްވާ.",
+tip_Subscriptions:"ނާދިރު ބޭނުންކުރާ ސަރވިސްތައް ކެންސަލް ކުރައްވާ، ޢާއިލީ ޕްލޭންތައް ބައިވެރިވެ ބޭނުންކުރައްވާ، އަދި ތިން މަހަކު އެއްފަހަރު ބަލާލައްވާ.",
+tip_Other:"މި ޚަރަދުތައް އެކެއް އެކެއްގެ ގޮތުން ބަލާލައްވާ، އަދި ކޮންތަނެއް އަންނަނިވި މަހު ދޫކުރެވޭނެތޯ ސުވާލުކުރައްވާ.",
+t_noIncome:"މަހުގެ އާމްދަނީ އިތުރުކުރައްވާ",d_noIncome:"ނަސޭހަތް ދެވޭނީ އާމްދަނީއާ އަޅާބަލައިގެންނެވެ. އެހެންކަމުން މަތީގައި މަހުގެ އާމްދަނީ ލިޔުއްވާ.",
+t_over:"ތިބާ {x} އިތުރަށް ޚަރަދުކުރަނީ",d_over:"ޚަރަދު އާމްދަނީއަށްވުރެ ބޮޑެވެ. ބޭނުންތެރި ނޫން ބޮޑު ޚަރަދުތައް ފުރަތަމަ ކުޑަކުރައްވާ، އަދި އާ ޚަރަދުތައް ހުއްޓުއްވާ.",
+t_rate:"ތިބާގެ ސޭވިންގްސް ރޭޓް {r}% އެވެ",d_rate:"އާމްދަނީގެ 20% ({g}) ސޭވްކުރުމަކީ އާންމު މަޤްޞަދެކެވެ. އިތުރަށް {x} ބޭނުންވެއެވެ.",
+t_great:"ރަނގަޅު މަސައްކަތެއް: ތިބާ އާމްދަނީގެ {r}% ސޭވްކުރަނީ",d_great:"ސޭވްކުރާ ފައިސާ ވަކި ސޭވިންގްސް އެކައުންޓެއްގައި ބަހައްޓާށެވެ. އެހެންވިއްޔާ ނޭނގި ޚަރަދުވެގެން ނުދާނެއެވެ.",
+t_wants:"ބޭނުންތަކަށް އާމްދަނީގެ 30% އަށްވުރެ ގިނަ ޚަރަދުވޭ",d_wants:"ޝޮޕިންގް، މަޖާ، ސަބްސްކްރިޕްޝަންތަކާއި އެހެނިހެން ބޭނުންތަކަށް ތިބާ {w} ޚަރަދުކުރަނީ. މިއީ {g} އާ ގާތްކުރަން މަސައްކަތްކުރައްވާ.",
+t_cat:"{c}: އާމްދަނީގެ {p}% (މަޤްޞަދު ގާތްގަނޑަކަށް {b}%)",d_cat:"މަހަކު {x} އާއި ހަމައަށް ސޭވްކުރެވިދާނެ. {tip}",
+t_top:"ތިބާގެ އެންމެ ބޮޑު ޚަރަދަކީ {n} ({a})",d_top:"އެއީ ހަމަކަށަވަރުން ބޭނުންތެރި ޚަރަދެއްތޯ، އަދި އެއަށްވުރެ ތަނަވަސް ގޮތެއް ހުރިތޯ ވިސްނާލައްވާ.",
+t_largest:"{c} އީ ތިބާގެ އެންމެ ބޮޑު ބާވަތް",t_track:"ކޮންމެ ދުވަހަކު ލިޔުއްވާ",d_track:"ކުޑަ ޚަރަދުތައް އެކުލެވި ބޮޑުވެއެވެ. ޚަރަދުކުރާ ދުވަހު ހަމަ މިތަނަށް ލިޔުއްވާ.",
+dName:"ނަން",dType:"ބާވަތް",dBal:"ދައްކަންޖެހޭ ބާކީ",dRate:"އަހަރުގެ އިންޓްރެސްޓް (%)",dPay:"މަހުގެ ޕޭމަންޓް",dStart:"ލޯނު ފެށޭ ތާރީޚް",dEnd:"ލޯނު ނިމޭ ތާރީޚް",dExtra:"މަހަކު އިތުރަށް ދެއްކޭނެ އަދަދު",addDebt:"ދަރަނި އިތުރުކުރައްވާ",
+phDname:"މިސާލު: ބޭންކު ލޯނު",phExtra:"މިސާލު: 500",
+dNote:"މަހުގެ ޕޭމަންޓްތައް ޚަރަދުތަކާއި ސޭވިންގްސް ނަސޭހަތުގައި ހިމެނެއެވެ. މޯލްޑިވްސްގައި ޕާސަނަލް ލޯނުތަކުގެ އިންޓްރެސްޓް އަހަރަކު 15% ގާތްގަނޑަކަށް އޮތް ކަމަށްވާތީ، ތިބާގެ އެއްބަސްވުމުގައިވާ ރޭޓް ބޭނުންކުރައްވާ.",
+"type_Personal loan":"ޕާސަނަލް ލޯނު","type_Credit card":"ކްރެޑިޓް ކާޑު",
+dEmpty:"އަދި ލޯނެއް ނުވަތަ ކާޑެއް އިތުރުކުރެވިފައެއް ނުވޭ. މަތީގައި އިތުރުކުރައްވައި، ކިތަނެއްހާ ދުވަހުގައި ނިމޭނެ ކަމާއި އިންޓްރެސްޓް މަދުކުރާނެ ގޮތް ބައްލަވާ.",
+sOwed:"ޖުމްލަ ދައްކަންޖެހޭ",sMonthly:"މަހުގެ ޕޭމަންޓް",sInt:"އަހަރުގެ އިންޓްރެސްޓް (ގާތްގަނޑަކަށް)",sAll:"ހުރިހާ ދަރަނި ނިމޭނީ",
+meta:"{type}، އަހަރަކު {r}%",range:"{a} އިން {b} އަށް",owedLine:"ދައްކަންޖެހޭ {b}، މަހަކު {p} ދައްކަނީ",
+grow:"ތިބާގެ ޕޭމަންޓުން މަހުގެ އިންޓްރެސްޓް ({i}) ވެސް ނުފުރޭ، ދަރަނި ބޮޑުވަމުންދާނެ. އިތުރަށް ދައްކަވާ.",
+free:"ގާތްގަނޑަކަށް {m} ({d}) ގައި ދަރަނިން ސަލާމަތްވާނެ، އިންޓްރެސްޓްގެ ގޮތުން {i} ދެއްކޭނެ.",
+extraLine:"މަހަކު {e} އިތުރަށް ދެއްކުމުން: {d} ގައި ދަރަނިން ސަލާމަތްވާނެ ({n} މަސް ކުރީގައި)، އިންޓްރެސްޓްގެ ގޮތުން {i} ސޭވްވާނެ، އަދި ދެން މަހަކު {p} ސޭވްކުރެވޭނެ.",
+pct:"ލޯނުގެ މުއްދަތުގެ {p}% ހިނގައިފި",ended:"ނިމޭ ތާރީޚް ހަމަވެއްޖެ. ބާކީ ހުރި ސާފުކުރުމަށް ވީހާ އަވަހަކަށް ދައްކަވާ.",
+onTrack:"ރަނގަޅު ގޮތެއްގައި: ތިބާގެ ޕޭމަންޓުން {d} ގެ ކުރިން ނިމޭނެ.",afterThat:"އޭގެ ފަހުން މަހަކު {p} ({y} އަހަރަކު) ސޭވްކުރެވޭނެ.",
+needMore:"{d} ގެ ކުރިން ނިންމުމަށް މަހަކު {n} ދައްކަން ޖެހޭނެ، އެއީ މިހާރުއަށްވުރެ {x} އިތުރެވެ.",
+yr:"އަހަރު",mo:"މަސް",under1:"އެއް މަހަށްވުރެ ކުޑަ",
+hTitle:"ދަރަނި ހަމަޖެއްސުމުގެ ގޮތް",t_dti:"ދަރަނީގެ ޕޭމަންޓް އާމްދަނީގެ {r}% ނަގައެވެ",
+d_dtiBad:"މިއީ ވަރަށް މަތިއެވެ. އާ ލޯނެއް ނުވަތަ ކާޑުން ޚަރަދެއް ނުކުރައްވާ، އަދި ދަރަނި އަވަހަށް ނިންމުމަށް އެހެން ޚަރަދުތައް ކުޑަކުރައްވާ.",
+d_dtiWarn:"މިއީ އާންމު ރަނގަޅު ހައްދު (ގާތްގަނޑަކަށް 30%) އަށްވުރެ މަތިއެވެ. ކުޑަވަންދެން އާ ދަރަނި ނަގައިނުލައްވާ.",
+d_dtiOk:"މިއީ އާންމު ރަނގަޅު ހައްދު (ގާތްގަނޑަކަށް 30%) ގެ ތެރޭގައެވެ. އެގޮތަށް ބަހައްޓަވާ.",
+t_addInc:"އާމްދަނީ އިތުރުކުރައްވާ",d_addInc:"ދަރަނީގެ ޕޭމަންޓް ކިހާ ބޮޑުތޯ ބެލުމަށް ފުރަތަމަ ޓެބްގައި މަހުގެ އާމްދަނީ ލިޔުއްވާ.",
+t_aval:"އެންމެ މަތީ ރޭޓް ފުރަތަމަ ދައްކަވާ: {n} ({r}%)",d_aval:"ކޮންމެ ދަރަނީގެ ބޭނުންވާ އަދަދު ދައްކަވާ، ދެން އިތުރު ފައިސާ ހުރިހާ އެންމެ މަތީ ރޭޓްގެ ދަރަނީގައި ބޭނުންކުރައްވާ. އެއީ އެންމެ މަދު އިންޓްރެސްޓް ދައްކާ ގޮތެވެ. އެ ދަރަނި ނިމުމުން އެ ޕޭމަންޓް ދެން އޮތް ދަރަނީގެ މައްޗަށް ބަދަލުކުރައްވާ.",
+t_extra1:"{n} ގައި އިތުރު ފައިސާ ބޭނުންކުރައްވާ",d_extra1:"ކޮންމެ މަހަކު ކުޑަ އިތުރު ޕޭމަންޓެއް ވެސް އިންޓްރެސްޓާއި މުއްދަތު ކުޑަކުރެއެވެ. އިތުރު އަދަދުގެ ބޮކްސް ބޭނުންކޮށްލައްވާ.",
+t_card:"ކްރެޑިޓް ކާޑު: ކުރެވެން އޮތްނަމަ ހުރިހާ ބާކީ ދައްކަވާ",d_card:"މިނިމަމް ހަމައެކަނި ދެއްކުމުން ދިގު މުއްދަތަކަށް ދަރަނިވެރިވެ ދެމިހުރެއެވެ. މި މަހު ދެއްކޭނެ ނޫން އެއްޗަކަށް ކާޑު ބޭނުންނުކުރައްވާ، ކޭޝް އެޑްވާންސް ދުރުކުރައްވާ (އެކަމަކަށް އާންމުކޮށް އިތުރު ފީ ހުރެއެވެ)، އަދި ދެއްކުމުގެ ތާރީޚް ނުފާއިތުވާނެހެން ބަލަހައްޓަވާ.",
+t_loan:"ޕާސަނަލް ލޯނު: ރަނގަޅު ޑީލެއް އެދެއްވާ",d_loan:"އެހެން ބޭންކުތަކުގެ އޮފަރތައް އަޅާބަލައްވާ. ރޭޓް ސާފުކޮށް ކުޑަ ކަމަށް ވާނަމަ ރީފައިނޭންސް ކުރުމުން ފައިސާ ސޭވްވެދާނެ، އެކަމަކު ކުރިން ފީތަކާއި އަވަހަށް ނިންމުމުގެ ޗާޖުތައް ބަލާލައްވާ. ބަލައިގެން އާ ލޯނެއް ނުނަގާ، ޖުމްލަ ޚަރަދު ކުޑަވާ ކަމެއް ނޫނީ.",
+t_sure:"ދަރަނި ދެއްކުމަކީ ޔަޤީން ފައިދާއެއް",d_sure:"{r}% ގެ ދަރަނިއެއް ނިންމުމުން ޔަޤީންކޮށް {r}% ފައިދާއެއް ލިބެއެވެ، އެއީ އާންމުކޮށް ސޭވިންގްސް އެކައުންޓަކުން ލިބޭ އަށްވުރެ ގިނައެވެ. ކުރިން ކުޑަ އިމަރޖެންސީ ފަންޑެއް (އެއް މަހުގެ ޚަރަދު ވެސް) ހަދައްވާ، އެއިން ނާމޮޅު ޚަރަދެއް އަނެއްކާ ކާޑަށް ނުދެވޭނެއެވެ.",
+t_stop:"އާ ދަރަނި ނަގަން ހުއްޓުއްވާ",d_stop:"ޝޮޕިންގް އަދި ބޭރަށް ދިއުމުގެ ފަދަ ބޭނުންތަކަށް ކޭޝް ދައްކަވާ. ކޮންމެ އާ ލޯނެއް ނުވަތަ ކާޑު ގަތުމެއް މަހުގެ ޕޭމަންޓް ބޮޑުކޮށް ސޭވްކުރެވޭނެ އަދަދު ކުޑަކުރެއެވެ.",
+aiTitle:"ތިބާގެ ލޯނުތަކުގެ ސުވާލު AI އާ ކުރައްވާ",aiSub:"AI އަށް ތިބާ ލިޔުއްވާފައިވާ އާމްދަނީ، ޚަރަދު އަދި ލޯނުތައް ފެނެއެވެ. އެއީ އާންމު އިރުޝާދެކެވެ، ޕްރޮފެޝަނަލް ނަސޭހަތެއް ނޫނެވެ.",
+c1:"ކޮން ދަރަނި ފުރަތަމަ؟",q1:"ކޮން ދަރަނި ފުރަތަމަ ދެއްކަންވީ؟",c2:"އަވަހަށް ދަރަނިން ސަލާމަތްވާން",q2:"އަވަހަށް ދަރަނިން ސަލާމަތްވާނީ ކިހިނެއް؟",c3:"އިތުރަށް ދެއްކެވޭނެތަ؟",q3:"މަހަކު އިތުރަށް ދެއްކެވޭނެތަ؟",c4:"އާ ލޯނެއް ނަގަންވީތަ؟",q4:"އާ ލޯނެއް ނަގަންވީތަ؟",
+phChat:"ތިބާގެ ލޯނާއި ސޭވިންގްސްގެ ސުވާލެއް ކުރައްވާ",send:"ފޮނުވާ",thinking:"ވިސްނަނީ...",
+aiNA:"މިތަނުގައި AI ޗެޓް ނުލިބެއެވެ. ކްލޯޑްގެ އެކައުންޓުން ސައިން އިންވެ، ޕަބްލިޝްކުރެވިފައިވާ ލިންކު ހުޅުއްވާ.",
+aiDenied:"ހުއްދަ ނުލިބުނީމަ AI އަށް ޖަވާބު ނުދެވޭނެ. ޕޭޖްގެ ޕާމިޝަންސް މެނޫއިން ހުއްދަ ދެއްވޭނެ.",
+aiRate:"ސުވާލު ވަރަށް ގިނައެވެ. އެއް މިނިޓް މަޑުކުރާށެވެ.",aiFail:"AI އަށް ޖަވާބު ނުދެވުނެވެ. އަލުން މަސައްކަތްކުރައްވާ."
+};
+const MON={en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],dv:["ޖެނުއަރީ","ފެބްރުއަރީ","މާރިޗު","އޭޕްރިލް","މޭ","ޖޫން","ޖުލައި","އޮގަސްޓް","ސެޕްޓެމްބަރު","އޮކްޓޯބަރު","ނޮވެމްބަރު","ޑިސެމްބަރު"]};
+let lang="en";
+try{const sv=localStorage.getItem("budget-lang");lang=sv||((navigator.language||"").toLowerCase().startsWith("dv")?"dv":"en")}catch(e){}
+function t(k,v){let s=(L[lang]&&L[lang][k])||L.en[k]||k;if(v)for(const n in v)s=s.split("{"+n+"}").join(v[n]);return s}
+const CATKEYS=["Housing","Food","Transport","Bills","Health","Shopping","Entertainment","Subscriptions","Other"];
+const CATS={Housing:{need:1,bench:30},Food:{need:1,bench:15},Transport:{need:1,bench:10},Bills:{need:1,bench:10},Health:{need:1,bench:8},Shopping:{need:0,bench:5},Entertainment:{need:0,bench:5},Subscriptions:{need:0,bench:3},Other:{need:0,bench:5},Debt:{need:1,bench:30}};
+const cn=c=>t("c_"+c);
+let S={income:0,cur:"MVR",items:[],debts:[],extra:0};
+try{const r=localStorage.getItem("budget-v1");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem("budget-v1",JSON.stringify(S))}catch(e){}
+if(typeof sb!=="undefined"&&sb&&session){clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudSave,800)}}
+function fmt(n){return "\u2066"+S.cur+" "+(Math.round(n*100)/100).toLocaleString("en-US")+"\u2069"}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function fillSel(sel,arr){const v=sel.value;sel.innerHTML=arr.map(a=>`<option value="${a[0]}">${esc(t(a[1]))}</option>`).join("");if(v)sel.value=v}
+$("income").value=S.income||"";$("cur").value=S.cur;
+
+function debtPay(){return S.debts.reduce((a,d)=>a+d.pay,0)}
+function tips(){
+const inc=S.income,dpay=debtPay(),tot=S.items.reduce((a,x)=>a+x.amt,0)+dpay,out=[];
+if(!S.items.length&&!S.debts.length)return {out,potential:0,tot};
+const by={};S.items.forEach(x=>by[x.cat]=(by[x.cat]||0)+x.amt);
+if(dpay)by.Debt=dpay;
+let potential=0;
+if(!inc)out.push({lvl:"warn",t:t("t_noIncome"),d:t("d_noIncome")});
+else{
+const left=inc-tot,rate=left/inc*100;
+if(left<0)out.push({lvl:"bad",t:t("t_over",{x:fmt(-left)}),d:t("d_over")});
+else if(rate<20)out.push({lvl:"warn",t:t("t_rate",{r:rate.toFixed(0)}),d:t("d_rate",{g:fmt(inc*.2),x:fmt(inc*.2-left)})});
+else out.push({lvl:"good",t:t("t_great",{r:rate.toFixed(0)}),d:t("d_great")});
+const wants=Object.keys(by).filter(c=>!CATS[c].need).reduce((a,c)=>a+by[c],0);
+if(wants>inc*.3)out.push({lvl:"warn",t:t("t_wants"),d:t("d_wants",{w:fmt(wants),g:fmt(inc*.3)})});
+Object.keys(by).sort((a,b)=>by[b]-by[a]).forEach(c=>{
+if(c==="Debt")return;
+const lim=inc*CATS[c].bench/100;
+if(by[c]>lim){const cut=by[c]-lim;potential+=cut;
+out.push({lvl:"warn",t:t("t_cat",{c:cn(c),p:(by[c]/inc*100).toFixed(0),b:CATS[c].bench}),d:t("d_cat",{x:fmt(cut),tip:t("tip_"+c)})});}
+});
+}
+const top=[...S.items].sort((a,b)=>b.amt-a.amt)[0];
+if(top)out.push({lvl:"",t:t("t_top",{n:esc(top.name),a:fmt(top.amt)}),d:t("d_top")});
+if(!inc){const c=Object.keys(by).sort((a,b)=>by[b]-by[a])[0];if(c&&c!=="Debt")out.push({lvl:"",t:t("t_largest",{c:cn(c)}),d:t("tip_"+c)})}
+out.push({lvl:"",t:t("t_track"),d:t("d_track")});
+return {out,potential,tot};
+}
+
+function render(){
+const dpay=debtPay(),tot=S.items.reduce((a,x)=>a+x.amt,0)+dpay,left=S.income-tot;
+$("stats").innerHTML=`<div class="stat"><small>${t("stIncome")}</small><b>${fmt(S.income||0)}</b></div>
+<div class="stat"><small>${t("stTotal")}</small><b>${fmt(tot)}</b></div>
+<div class="stat"><small>${t("stDebtPay")}</small><b>${fmt(dpay)}</b></div>
+<div class="stat"><small>${t("stLeft")}</small><b class="${left<0?"bad":"good"}">${fmt(left)}</b></div>`;
+const by={};S.items.forEach(x=>by[x.cat]=(by[x.cat]||0)+x.amt);
+if(dpay)by.Debt=dpay;
+let h=`<div class="panel"><h2 style="margin:0 0 10px;font-size:1.1rem">${t("byCat")}</h2>`;
+const keys=Object.keys(by).sort((a,b)=>by[b]-by[a]);
+h+=keys.length?keys.map(c=>{const p=tot?by[c]/tot*100:0;
+return `<div class="cbar"><div class="h"><span>${esc(cn(c))}</span><span>${fmt(by[c])} (${p.toFixed(0)}%)</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`}).join(""):`<p class="empty">${t("noExpYet")}</p>`;
+h+=`</div><div class="panel"><h2 style="margin:0 0 6px;font-size:1.1rem">${t("allExp")}</h2><ul>`;
+h+=S.items.length?S.items.map(x=>`<li class="item"><span class="name">${esc(x.name)}<br><span class="cat">${esc(cn(x.cat))}</span></span><b>${fmt(x.amt)}</b><button class="del" data-id="${x.id}" aria-label="${esc(t("delAria",{n:x.name}))}">${t("del")}</button></li>`).join(""):`<li class="empty">${t("nothingYet")}</li>`;
+h+=`</ul></div>`;
+$("p1").innerHTML=h;
+const T=tips();
+$("tipCount").textContent=T.out.length;
+let g="";
+if(!S.items.length&&!S.debts.length)g=`<div class="panel empty">${t("tipsEmpty")}</div>`;
+else{
+if(T.potential>0)g+=`<div class="panel hl">${t("saveMY",{m:`<b class="good">${fmt(T.potential)}</b>`,y:`<b class="good">${fmt(T.potential*12)}</b>`})}</div>`;
+g+=`<div class="panel">`+T.out.map(x=>`<div class="tip ${x.lvl==="good"?"":x.lvl}"><strong>${x.t}</strong>${x.d}</div>`).join("")+`</div>`;
+}
+$("p2").innerHTML=g;
+renderDebt();
+}
+function tab(n){
+[1,2,3].forEach(i=>{$("p"+i).hidden=n!==i;$("t"+i).setAttribute("aria-selected",n===i)});
+}
+$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);$("t3").onclick=()=>tab(3);
+
+function plan(B,rate,P){const r=rate/1200;if(!r)return {n:Math.ceil(B/P),int:0};if(P<=r*B)return null;const n=-Math.log(1-r*B/P)/Math.log(1+r);return {n:Math.ceil(n),int:Math.max(0,n*P-B)}}
+function mo(n){const y=Math.floor(n/12),m=n%12;return ((y?y+" "+t("yr")+" ":"")+(m?m+" "+t("mo"):"")).trim()||t("under1")}
+function pd(s){const a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2])}
+function ym(d){return MON[lang][d.getMonth()]+" "+d.getFullYear()}
+function addM(n){const x=new Date();x.setDate(1);x.setMonth(x.getMonth()+n);return x}
+function monthsBetween(a,b){return (b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()}
+function needPay(B,rate,n){const r=rate/1200;return r?B*r/(1-Math.pow(1+r,-n)):B/n}
+function dateInfo(d){
+if(!d.end)return "";
+const now=new Date(),end=pd(d.end),rem=monthsBetween(now,end);let h="";
+if(d.start){const st=pd(d.start),tot=monthsBetween(st,end),el=monthsBetween(st,now);if(tot>0){const pc=Math.max(0,Math.min(100,el/tot*100));h+=`<div class="bar"><i style="width:${pc}%"></i></div><span class="cat">${t("pct",{p:pc.toFixed(0)})}</span>`}}
+if(rem<=0)return h+`<br><span class="bad">${t("ended")}</span>`;
+const need=needPay(d.bal,d.rate,rem);
+if(d.pay>=need)h+=`<br><span class="good">${t("onTrack",{d:ym(end)})}</span> ${t("afterThat",{p:fmt(d.pay),y:fmt(d.pay*12)})}`;
+else h+=`<br><span class="bad">${t("needMore",{d:ym(end),n:fmt(need),x:fmt(need-d.pay)})}</span>`;
+return h}
+function renderDebt(){
+const D=S.debts,ex=S.extra||0;
+if(!D.length){$("dlist").innerHTML=`<div class="panel empty">${t("dEmpty")}</div>`;return}
+const totB=D.reduce((a,d)=>a+d.bal,0),pay=debtPay(),yi=D.reduce((a,d)=>a+d.bal*d.rate/100,0),inc=S.income,last=D.map(d=>plan(d.bal,d.rate,d.pay)).filter(Boolean).reduce((m,p)=>Math.max(m,p.n),0);
+let h=`<div class="stats"><div class="stat"><small>${t("sOwed")}</small><b>${fmt(totB)}</b></div><div class="stat"><small>${t("sMonthly")}</small><b>${fmt(pay)}</b></div><div class="stat"><small>${t("sInt")}</small><b class="bad">${fmt(yi)}</b></div><div class="stat"><small>${t("sAll")}</small><b>${last?ym(addM(last)):"-"}</b></div></div>`;
+h+=`<div class="panel"><ul>`+D.map(d=>{
+const p=plan(d.bal,d.rate,d.pay);let s;
+if(!p)s=`<span class="bad">${t("grow",{i:fmt(d.bal*d.rate/1200)})}</span>`;
+else{s=t("free",{m:`<b>${mo(p.n)}</b>`,d:ym(addM(p.n)),i:fmt(p.int)});
+if(ex>0){const q=plan(d.bal,d.rate,d.pay+ex);if(q)s+=`<br>`+t("extraLine",{e:fmt(ex),d:`<b class="good">${ym(addM(q.n))}</b>`,n:p.n-q.n,i:fmt(p.int-q.int),p:fmt(d.pay+ex)})}}
+s+=dateInfo(d);
+const meta=t("meta",{type:t("type_"+d.type),r:d.rate})+(d.start||d.end?", "+t("range",{a:d.start?ym(pd(d.start)):"?",b:d.end?ym(pd(d.end)):"?"}):"");
+return `<li class="item"><span class="name"><b>${esc(d.name)}</b> <span class="cat">${esc(meta)}</span><br>${t("owedLine",{b:fmt(d.bal),p:fmt(d.pay)})}<br>${s}</span><button class="del" data-did="${d.id}">${t("del")}</button></li>`}).join("")+`</ul></div>`;
+const T=[],hi=[...D].sort((a,b)=>b.rate-a.rate)[0];
+if(inc){const r=pay/inc*100;
+if(r>40)T.push({l:"bad",t:t("t_dti",{r:r.toFixed(0)}),d:t("d_dtiBad")});
+else if(r>30)T.push({l:"warn",t:t("t_dti",{r:r.toFixed(0)}),d:t("d_dtiWarn")});
+else T.push({l:"",t:t("t_dti",{r:r.toFixed(0)}),d:t("d_dtiOk")});}
+else T.push({l:"warn",t:t("t_addInc"),d:t("d_addInc")});
+if(D.length>1)T.push({l:"",t:t("t_aval",{n:esc(hi.name),r:hi.rate}),d:t("d_aval")});
+else T.push({l:"",t:t("t_extra1",{n:esc(hi.name)}),d:t("d_extra1")});
+if(D.some(d=>d.type==="Credit card"))T.push({l:"warn",t:t("t_card"),d:t("d_card")});
+if(D.some(d=>d.type==="Personal loan"))T.push({l:"",t:t("t_loan"),d:t("d_loan")});
+if(hi.rate>=10)T.push({l:"",t:t("t_sure"),d:t("d_sure",{r:hi.rate})});
+T.push({l:"",t:t("t_stop"),d:t("d_stop")});
+h+=`<div class="panel"><h2 style="margin:0 0 10px;font-size:1.1rem">${t("hTitle")}</h2>`+T.map(x=>`<div class="tip ${x.l}"><strong>${x.t}</strong>${x.d}</div>`).join("")+`</div>`;
+$("dlist").innerHTML=h;
+}
+$("dx").value=S.extra||"";
+$("dx").oninput=e=>{S.extra=parseFloat(e.target.value)||0;save();renderDebt()};
+$("dadd").onclick=()=>{
+const name=$("dn").value.trim(),bal=parseFloat($("db").value),rate=parseFloat($("dr").value),pay=parseFloat($("dm").value);
+const start=$("ds").value,end=$("de").value;
+if(!name){$("dn").focus();return}
+if(!(bal>0)){$("db").focus();return}
+if(!(rate>=0)){$("dr").focus();return}
+if(!(pay>0)){$("dm").focus();return}
+if(start&&end&&end<=start){$("de").focus();return}
+S.debts.push({id:Date.now()+Math.random(),name,type:$("dt").value,bal,rate,pay,start,end});
+$("dn").value="";$("db").value="";$("dm").value="";$("ds").value="";$("de").value="";$("dn").focus();
+save();render();
+};
+$("dlist").addEventListener("click",e=>{const id=e.target.dataset&&e.target.dataset.did;if(id){S.debts=S.debts.filter(x=>String(x.id)!==id);save();render()}});
+
+function add(){
+const name=$("name").value.trim(),amt=parseFloat($("amt").value);
+if(!name||!(amt>0)){(name?$("amt"):$("name")).focus();return}
+S.items.push({id:Date.now()+Math.random(),name,amt,cat:$("cat").value});
+$("name").value="";$("amt").value="";$("name").focus();
+save();render();
+}
+$("addBtn").onclick=add;
+["name","amt"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")add()}));
+$("income").oninput=e=>{S.income=parseFloat(e.target.value)||0;save();render()};
+$("cur").oninput=e=>{S.cur=e.target.value||"";save();render()};
+$("p1").addEventListener("click",e=>{const id=e.target.dataset&&e.target.dataset.id;if(id){S.items=S.items.filter(x=>String(x.id)!==id);save();render()}});
+
+const chat=[];
+function ctx(){
+const by={};S.items.forEach(x=>by[x.cat]=(by[x.cat]||0)+x.amt);
+return JSON.stringify({today:new Date().toISOString().slice(0,10),currency:S.cur,monthlyIncome:S.income,expensesByCategory:by,loansAndCards:S.debts.map(d=>({name:d.name,type:d.type,balance:d.bal,yearlyInterestPercent:d.rate,monthlyPayment:d.pay,startDate:d.start||null,endDate:d.end||null})),extraMonthlyPaymentUserCouldMake:S.extra||0});
+}
+function bubble(cls,text){const d=document.createElement("div");d.className="msg "+cls;d.textContent=text;$("chatLog").appendChild(d);d.scrollIntoView({block:"nearest"});return d}
+async function callAI(prompt,onText){
+const tok=session&&session.access_token;
+if(!tok){const e=new Error("na");e.code="na";throw e}
+const res=await fetch(CONFIG.AI_URL,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok},body:JSON.stringify({prompt})});
+const j=await res.json().catch(()=>({}));
+if(!res.ok){const er=new Error(j.error||"error");er.code=res.status===429?"rate_limited":res.status===401?"not_granted":"err";throw er}
+return j.text||"-";
+}
+async function ask(q){
+if(!q||$("chatBtn").disabled)return;
+$("chatIn").value="";
+bubble("u",q);
+const out=bubble("a",t("thinking"));
+$("chatBtn").disabled=true;
+try{
+const hist=chat.map(m=>(m.role==="user"?"User: ":"Coach: ")+m.content).join("\n");
+const prompt=`You are a friendly money coach inside a budget app used in the Maldives. Use simple, short sentences and plain words. Reply in ${lang==="dv"?"simple Dhivehi using Thaana script":"English"}, unless the user clearly writes in another language. Use the numbers in the data below and show the working in one or two lines. Give general guidance only, never invent bank rates or fees, and say to confirm exact terms with the bank when it matters. Keep each answer under 150 words, with no tables.\n\nUser budget data (JSON):\n${ctx()}\n\nConversation so far:\n${hist||"(none)"}\n\nUser: ${q}\nCoach:`;
+const text=await callAI(prompt,x=>{out.textContent=x});
+out.textContent=text;
+chat.push({role:"user",content:q},{role:"assistant",content:text});
+}catch(e){
+const c=e&&e.code;
+out.textContent=c==="na"?t("aiNA"):c==="not_granted"?t("aiDenied"):c==="rate_limited"?t("aiRate"):t("aiFail");
+}finally{$("chatBtn").disabled=false}
+}
+$("chatBtn").onclick=()=>ask($("chatIn").value.trim());
+$("chatIn").addEventListener("keydown",e=>{if(e.key==="Enter")ask($("chatIn").value.trim())});
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>ask(b.dataset.q));
+
+function applyLang(){
+const h=document.documentElement;h.lang=lang;h.dir=lang==="dv"?"rtl":"ltr";document.title=t("title");
+document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
+document.querySelectorAll("[data-ip]").forEach(e=>e.placeholder=t(e.dataset.ip));
+document.querySelectorAll(".chip").forEach(b=>b.dataset.q=t(b.dataset.qk));
+fillSel($("cat"),CATKEYS.map(k=>[k,"c_"+k]));
+fillSel($("dt"),[["Personal loan","type_Personal loan"],["Credit card","type_Credit card"]]);
+$("lEn").setAttribute("aria-pressed",lang==="en");$("lDv").setAttribute("aria-pressed",lang==="dv");
+if(typeof authUI==="function")authUI();
+render();
+}
+function setLang(l){lang=l;try{localStorage.setItem("budget-lang",l)}catch(e){}applyLang()}
+$("lEn").onclick=()=>setLang("en");$("lDv").onclick=()=>setLang("dv");
+Object.assign(L.en,{
+phEmail:"your@email.com",authSend:"Email me a sign-in link",signOut:"Sign out",
+authUsing:"Using this device only. Sign in to save your budget online and use the AI.",
+authIn:"Signed in as {e}. Your budget is saved online.",
+authCheck:"Check your email and open the sign-in link.",authSendErr:"Could not send the link: {m}",
+authSaveErr:"Could not save online. Your data is still saved on this device.",authLoadErr:"Could not load your online budget.",
+aiNA:"Please sign in at the top of the page to use the AI. This keeps the free AI limit for real users.",
+aiDenied:"Your sign-in has expired. Please sign in again.",
+aiRate:"The free AI limit is used up for now. Please try again later."});
+Object.assign(L.dv,{
+phEmail:"your@email.com",authSend:"ސައިން އިން ލިންކު އީމެއިލް ކުރޭ",signOut:"ސައިން އައުޓް",
+authUsing:"މި ޑިވައިސްގައި ހަމައެކަނި ބޭނުންކުރަނީ. އޮންލައިންގައި ސޭވްކުރުމަށާއި AI ބޭނުންކުރުމަށް ސައިން އިން ވުއްވާ.",
+authIn:"{e} ގެ ގޮތުގައި ސައިން އިން ވެފައި. ތިބާގެ ބަޖެޓް އޮންލައިންގައި ސޭވްވެއެވެ.",
+authCheck:"އީމެއިލް ބައްލަވައި ސައިން އިން ލިންކު ހުޅުއްވާ.",authSendErr:"ލިންކު ފޮނުވޭކަށް ނުލިބުނު: {m}",
+authSaveErr:"އޮންލައިންގައި ސޭވްނުވި. ތިބާގެ ޑޭޓާ މި ޑިވައިސްގައި ސޭވްވެފައި ވެއެވެ.",authLoadErr:"އޮންލައިން ބަޖެޓް ލޯޑްނުވި.",
+aiNA:"AI ބޭނުންކުރުމަށް ޕޭޖްގެ މަތީގައި ސައިން އިން ވުއްވާ. މިއީ ހަމަ ޙަޤީޤީ ބޭނުންތެރިންނަށް ހިލޭ AI ލިމިޓް ބާކީ ބަހައްޓުމަށެވެ.",
+aiDenied:"ތިބާގެ ސައިން އިން މުއްދަތު ހަމަވެއްޖެ. އަލުން ސައިން އިން ވުއްވާ.",
+aiRate:"ހިލޭ AI ލިމިޓް މިހާރަށް ހަމަވެއްޖެ. ފަހުން އަލުން މަސައްކަތްކުރައްވާ."});
+let session=null,sb=null,cloudTimer=null,loadedFor=null,authKey="authUsing",authVars={};
+try{if(window.supabase&&/^https:\/\/.+\.supabase\.co/.test(CONFIG.SUPABASE_URL))sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY)}catch(e){}
+function authMsg(k,v){authKey=k;authVars=v||{};$("authMsg").textContent=t(k,authVars)}
+function authUI(){
+if(!sb)return;
+$("authForm").hidden=!!session;$("signOut").hidden=!session;
+if(session&&(authKey==="authUsing"||authKey==="authIn"))authMsg("authIn",{e:session.user.email});
+else if(!session&&authKey==="authIn")authMsg("authUsing");
+else authMsg(authKey,authVars);
+}
+async function cloudSave(){
+if(!sb||!session)return;
+const {error}=await sb.from("budgets").upsert({user_id:session.user.id,data:S,updated_at:new Date().toISOString()});
+if(error)authMsg("authSaveErr");
+}
+async function cloudLoad(){
+const {data,error}=await sb.from("budgets").select("data").eq("user_id",session.user.id).maybeSingle();
+if(error){authMsg("authLoadErr");return}
+if(data&&data.data&&Object.keys(data.data).length){
+S=Object.assign({income:0,cur:"MVR",items:[],debts:[],extra:0},data.data);
+$("income").value=S.income||"";$("cur").value=S.cur;$("dx").value=S.extra||"";
+try{localStorage.setItem("budget-v1",JSON.stringify(S))}catch(e){}
+render();
+}else cloudSave();
+}
+if(sb){
+sb.auth.onAuthStateChange((ev,s)=>{
+session=s;authUI();
+if(s&&loadedFor!==s.user.id){loadedFor=s.user.id;setTimeout(cloudLoad,0)}
+if(!s)loadedFor=null;
+});
+$("signIn").onclick=async()=>{
+const email=$("em").value.trim();if(!email){$("em").focus();return}
+const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+if(error)authMsg("authSendErr",{m:error.message});else authMsg("authCheck");
+};
+$("signOut").onclick=()=>sb.auth.signOut();
+}else $("authBar").hidden=true;
+applyLang();
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
